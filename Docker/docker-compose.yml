@@ -1,0 +1,22 @@
+﻿
+services:
+  postgres:
+    image: postgres:17
+    container_name: car-dealership-postgres
+    environment:
+      POSTGRES_DB: car_dealership
+      POSTGRES_USER: dealership_user
+      POSTGRES_PASSWORD: Cars_2026
+    ports:
+      - "6432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dealership_user -d car_dealership"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  
