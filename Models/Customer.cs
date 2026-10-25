@@ -1,8 +1,27 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public class Class1
+namespace Projet_Csharp;
+
+[Table("Customers")]
+public class Customer
 {
-	public Class1()
-	{
-	}
+    [Key]
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    [Required]
+    public string LastName { get; set; } = "";
+
+    [Required]
+    public string FirstName { get; set; } = "";
+
+    public DateTime BirthDate { get; set; }
+
+    public string Phone { get; set; } = "";
+
+    public string Email { get; set; } = "";
+
+    public ICollection<Ownership> Ownerships { get; set; } = new List<Ownership>();
 }
