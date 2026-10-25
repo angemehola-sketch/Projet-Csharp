@@ -5,6 +5,7 @@ namespace Projet_Csharp.InterfaceRepository;
 
 public interface ICustomerRepository
 {
-    Task<List<Customer>> GetAllAsync();
-    Task AddAsync(Customer customer);
+    List<Customer> GetAll();
+    Customer? GetWithCars(Guid id);
+
 }

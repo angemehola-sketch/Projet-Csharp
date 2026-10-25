@@ -23,5 +23,6 @@ public class Customer
 
     public string Email { get; set; } = "";
 
+    // Voitures possédées par le client
     public ICollection<Ownership> Ownerships { get; set; } = new List<Ownership>();
 }

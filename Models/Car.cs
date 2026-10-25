@@ -25,5 +25,6 @@ public class Car
 
     public bool IsSold { get; set; }
 
+    // Relation ou une voiture peut avoir plusieurs propriétaires
     public ICollection<Ownership> Ownerships { get; set; } = new List<Ownership>();
 }
