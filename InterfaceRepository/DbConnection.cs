@@ -12,41 +12,54 @@ public class DbConnection
     }
 
     // Importe les données une seule fois, puis attribue les voitures déjà vendues
-    public void InitDb(List<Customer> clients, List<Car> voitures)
+    public void InitDb(List<Customer> customers, List<Car> cars)
     {
-        if (_context.Customers.Any()) return;
+        // Si des clients existent déjà, l'import a déjà été fait
+        if (_context.Customers.Any())
+        {
+            return;
+        }
 
-        _context.Customers.AddRange(clients);
-        _context.Cars.AddRange(voitures);
+        // Ajout des clients et des voitures en base
+        _context.Customers.AddRange(customers);
+        _context.Cars.AddRange(cars);
         _context.SaveChanges();
 
-        AttribuerVoituresVendues();
+        // Attribution des voitures déjà vendues à des clients
+        AssignSoldCars();
     }
 
     #region Attribution des voitures vendues
 
     // 2 voitures maximum par client
-    private void AttribuerVoituresVendues()
+    private void AssignSoldCars()
     {
-        Random hasard = new Random();
-        List<Customer> clients = _context.Customers.ToList();
-        List<Car> voituresVendues = _context.Cars.Where(c => c.IsSold).ToList();
-        Dictionary<Guid, int> compteurs = clients.ToDictionary(c => c.Id, c => 0);
+        Random random = new Random();
 
-        foreach (Car voiture in voituresVendues)
+        // Récupération des clients et des voitures vendues depuis la base
+        List<Customer> customers = _context.Customers.ToList();
+        List<Car> soldCars = _context.Cars.Where(c => c.IsSold).ToList();
+        // Nombre de voitures déjà attribuées à chaque client avec 0 au départ
+        Dictionary<Guid, int> carCounts = customers.ToDictionary(c => c.Id, c => 0);
+
+        foreach (Car car in soldCars)
         {
-            List<Customer> disponibles = clients.Where(c => compteurs[c.Id] < 2).ToList();
-            if (disponibles.Count == 0) break;
+            // Seuls les clients qui ont moins de 2 voitures peuvent en recevoir une
+            List<Customer> available = customers.Where(c => carCounts[c.Id] < 2).ToList();
+            if (available.Count == 0) break;
 
-            Customer client = disponibles[hasard.Next(disponibles.Count)];
+            // Choix d'un client au hasard parmi les disponibles
+            Customer customer = available[random.Next(available.Count)];
 
-            _context.Ownerships.Add(new Ownership
-            {
-                CustomerId = client.Id,
-                CarId = voiture.Id,
-                SaleDate = DateTime.UtcNow.AddDays(-hasard.Next(0, 14))
-            });
-            compteurs[client.Id]++;
+            // Création de la propriété, avec une date de vente dans les 14 derniers jours
+            Ownership ownership = new Ownership();
+            ownership.CustomerId = customer.Id;
+            ownership.CarId = car.Id;
+            ownership.SaleDate = DateTime.UtcNow.AddDays(-random.Next(0, 14));
+            _context.Ownerships.Add(ownership);
+
+            // Le client a une voiture de plus
+            carCounts[customer.Id]++;
         }
         _context.SaveChanges();
     }

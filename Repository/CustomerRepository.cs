@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Projet_Csharp.Data;
 using Projet_Csharp.InterfaceRepository;
@@ -15,14 +13,17 @@ public class CustomerRepository : ICustomerRepository
         _context = context;
     }
 
-    public async Task<List<Customer>> GetAllAsync()
+    public List<Customer> GetAll()
     {
-        return await _context.Customers.ToListAsync();
+        return _context.Customers.OrderBy(c => c.LastName).ThenBy(c => c.FirstName).ToList();
     }
 
-    public async Task AddAsync(Customer customer)
+    // Charge un client avec ses voitures
+    public Customer? GetWithCars(Guid id)
     {
-        _context.Customers.Add(customer);
-        await _context.SaveChangesAsync();
+        return _context.Customers
+            .Include(c => c.Ownerships)
+            .ThenInclude(o => o.Car)
+            .FirstOrDefault(c => c.Id == id);
     }
 }
